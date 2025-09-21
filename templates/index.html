@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class ='col-lg-8 text-center'>
+        <h1 class="display-4">WELCOME TO RATION SHOP PORTAL</h1>
+        <p1 class="lead">Find Your Shop And Easily To Check 
+            The Porducts.</p1>
+            </div>
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0"><i class="bi bi-geo-alt"></i> Select District</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('shops', district_id=0) }}" method="GET" id="districtForm">
+                    <div class="mb-3">
+                        <label for="district" class="form-label">Choose a district:</label>
+                        <select class="form-select" id="district" name="district_id" required>
+                            <option value="" selected disabled>Select a district</option>
+                            {% for district in districts %}
+                                <option value="{{ district.district_id }}">{{ district.district_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">View Shops</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-geo-alt-fill display-4 text-primary mb-3"></i>
+                <h3>Find Shops</h3>
+                <p>Locate ration shops in your district and check their product availability.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-basket-fill display-4 text-success mb-3"></i>
+                <h3>Check Products</h3>
+                <p>See what products are available and in what quantity at each shop.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-telephone-fill display-4 text-info mb-3"></i>
+                <h3>Contact Info</h3>
+                <p>Get contact information for shop managers to confirm availability.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.getElementById('districtForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const districtId = document.getElementById('district').value;
+        window.location.href = "{{ url_for('shops', district_id=0) }}".replace('0', districtId);
+    });
+</script>
+{% endblock %}

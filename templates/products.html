@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Product Availability - {{ shop.shop_name }}</h2>
+    <a href="{{ url_for('shops', district_id=shop.district_id) }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Back to Shops
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-boxes"></i> Available Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stock %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td>
+                                    {% if item.quantity > 0 %}
+                                        <span class="badge bg-success">{{ item.quantity }} kg</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.last_updated }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No stock information available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-person-badge"></i> Branch Manager</h5>
+            </div>
+            <div class="card-body">
+                {% if shop.manager_name %}
+                <h6 class="card-subtitle mb-2">{{ shop.manager_name }}</h6>
+                <p class="card-text">
+                    <i class="bi bi-envelope"></i> {{ shop.manager_email }}<br>
+                    <i class="bi bi-telephone"></i> {{ shop.manager_contact }}
+                </p>
+                {% else %}
+                <p class="card-text text-muted">
+                    <i class="bi bi-exclamation-triangle"></i> No manager assigned to this branch.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-shop"></i> Branch Information</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <strong>Shop Name:</strong> {{ shop.shop_name }}<br>
+                    <strong>District:</strong> {{ shop.district_name }}<br>
+                    <strong>Address:</strong> {{ shop.address or 'Not specified' }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

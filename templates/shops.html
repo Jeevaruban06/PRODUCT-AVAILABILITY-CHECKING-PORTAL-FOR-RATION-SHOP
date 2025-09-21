@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Ration Shops in {{ district.district_name }}</h2>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Back to Districts
+    </a>
+</div>
+
+<div class="row">
+    {% for shop in shops %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ shop.shop_name }}</h5>
+                <p class="card-text">
+                    <i class="bi bi-geo-alt"></i> {{ shop.address or 'Address not available' }}
+                </p>
+                {% if shop.manager_name %}
+                <p class="card-text">
+                    <i class="bi bi-person"></i> Manager: {{ shop.manager_name }}<br>
+                    <i class="bi bi-telephone"></i> Contact: {{ shop.manager_contact }}
+                </p>
+                {% else %}
+                <p class="card-text text-muted">
+                    <i class="bi bi-exclamation-triangle"></i> No manager assigned
+                </p>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{{ url_for('products', shop_id=shop.shop_id) }}" class="btn btn-primary btn-sm">
+                    View Products Availability <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No shops found in this district.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

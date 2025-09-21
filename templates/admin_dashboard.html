@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class ='col-lg-12 text-center'>
+    <h2>Admin Dashboard</h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white text-center p-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-map"></i> Districts</h5>
+                <h2 class="card-text">{{ district_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white text-center p-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-shop"></i> Shops</h5>
+                <h2 class="card-text">{{ shop_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white text-center p-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-box-seam"></i> Products</h5>
+                <h2 class="card-text">{{ product_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark text-center p-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-people"></i> Managers</h5>
+                <h2 class="card-text">{{ manager_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-plus-circle"></i> Add New District</h5>
+            </div>
+            <div class="card-body">
+                <form id="addDistrictForm">
+                    <div class="mb-3">
+                        <label for="districtName" class="form-label">District Name</label>
+                        <input type="text" class="form-control" id="districtName" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Add District</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-plus-circle"></i> Add New Branch</h5>
+            </div>
+            <div class="card-body">
+                <form id="addBranchForm">
+                    <div class="mb-3">
+                        <label for="shopName" class="form-label">Shop Name</label>
+                        <input type="text" class="form-control" id="shopName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="branchDistrict" class="form-label">District</label>
+                        <select class="form-select" id="branchDistrict" required>
+                            <option value="" selected disabled>Select a district</option>
+                            {% for district in districts %}
+                                <option value="{{ district.district_id }}">{{ district.district_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shopAddress" class="form-label">Address</label>
+                        <textarea class="form-control" id="shopAddress" rows="2"></textarea>
+                    </div>
+                    <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Add Branch</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-person-plus"></i> Hire Branch Manager</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('hire_manager') }}" class="btn btn-info">Go to Manager Hiring Portal</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // AJAX for adding district
+    document.getElementById('addDistrictForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const districtName = document.getElementById('districtName').value;
+        
+        fetch("{{ url_for('add_district') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `district_name=${encodeURIComponent(districtName)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('District added successfully');
+                document.getElementById('districtName').value = '';
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    });
+    
+    // AJAX for adding branch
+    document.getElementById('addBranchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const shopName = document.getElementById('shopName').value;
+        const districtId = document.getElementById('branchDistrict').value;
+        const address = document.getElementById('shopAddress').value;
+        
+        fetch("{{ url_for('add_branch') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `shop_name=${encodeURIComponent(shopName)}&district_id=${districtId}&address=${encodeURIComponent(address)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Branch added successfully');
+                document.getElementById('addBranchForm').reset();
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    });
+</script>
+{% endblock %}

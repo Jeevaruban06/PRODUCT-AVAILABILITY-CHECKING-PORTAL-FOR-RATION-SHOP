@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Branch Manager Dashboard</h2>
+    </class>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-boxes"></i> Current Stock</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity (kg)</th>
+                                <th>Last Updated</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stock %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td>
+                                    {% if item.quantity > 0 %}
+                                        <span class="badge bg-success">{{ item.quantity }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.last_updated }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateStockModal" data-product-id="{{ item.product_id }}" data-product-name="{{ item.product_name }}" data-current-quantity="{{ item.quantity }}">
+                                        <i class="bi bi-pencil"></i> Update
+                                    </button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">No products in stock yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-shop"></i> Branch Information</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">{{ shop.shop_name }}</h6>
+                <p class="card-text">
+                    <strong>District:</strong> {{ shop.district_name }}<br>
+                    <strong>Address:</strong> {{ shop.address or 'Not specified' }}<br>
+                    <strong>Manager:</strong> {{ session.name }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0"><i class="bi bi-plus-circle"></i> Add Products to Shop</h5>
+            </div>
+            <div class="card-body">
+                {% if available_products %}
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label for="productSelect" class="form-label">Select Product</label>
+                        <select class="form-select" id="productSelect" name="product_id" required>
+                            <option value="" selected disabled>Choose a product</option>
+                            {% for product in available_products %}
+                                <option value="{{ product.product_id }}">{{ product.product_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="initialQuantity" class="form-label">Initial Quantity (kg)</label>
+                        <input type="number" class="form-control" id="initialQuantity" name="quantity" min="0" step="0.1" value="0" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Add to Shop</button>
+                </form>
+                {% else %}
+                <p class="text-center mb-0">All available products are already in your shop</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0"><i class="bi bi-graph-up"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('profile') }}" class="btn btn-outline-info">
+                        <i class="bi bi-person"></i> Update Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Stock Modal -->
+<div class="modal fade" id="updateStockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Stock Quantity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateStockForm">
+                    <input type="hidden" id="productId" name="product_id">
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="productName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Quantity (kg)</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" min="0" step="0.1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveStockBtn">Update Quantity</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Handle modal show event
+    var updateStockModal = document.getElementById('updateStockModal');
+    updateStockModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var productId = button.getAttribute('data-product-id');
+        var productName = button.getAttribute('data-product-name');
+        var currentQuantity = button.getAttribute('data-current-quantity');
+        
+        document.getElementById('productId').value = productId;
+        document.getElementById('productName').value = productName;
+        document.getElementById('quantity').value = currentQuantity;
+    });
+    
+    // Handle save button click for stock update
+    document.getElementById('saveStockBtn').addEventListener('click', function() {
+        const productId = document.getElementById('productId').value;
+        const quantity = document.getElementById('quantity').value;
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('quantity', quantity);
+        
+        fetch("{{ url_for('update_stock') }}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Stock quantity updated successfully');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    });
+    
+    // Handle form submission for adding new product to shop
+    document.getElementById('addProductForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch("{{ url_for('add_product_to_shop') }}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to shop successfully');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    });
+</script>
+{% endblock %}
